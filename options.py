@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 """
     Parse input arguments
+    
+    Original author:
+        __author__ = 'Oriol Ramos Terrades'
+        __email__ = 'oriolrt@cvc.uab.cat'
 """
 
 import argparse
-
-__author__ = 'Oriol Ramos Terrades'
-__email__ = 'oriolrt@cvc.uab.cat'
-
 
 from argparse import HelpFormatter
 from operator import attrgetter
 
 class SortingHelpFormatter(HelpFormatter):
+    
     def add_arguments(self, actions):
         actions = sorted(actions, key=attrgetter('option_strings'))
         super(SortingHelpFormatter, self).add_arguments(actions)
