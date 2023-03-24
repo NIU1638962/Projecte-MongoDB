@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar 10 10:47:53 2023
-
-@author: JoelT
-"""
 import pymongo
 import pandas as pd
 from options import Options
@@ -12,19 +6,16 @@ from options import Options
 def connect_database(database_name: str, local_test: bool = False) -> pymongo.database.Database:
     """
     Connects to the database and returns the pymongo object.
-
     Parameters
     ----------
     database_name : str
         Name of the database.
     local_test : bool, optional
         If true connects to the local database instead of the server. The default is False.
-
     Returns
     -------
     pymongo.database.Database
         pymongo database object.
-
     """
     if local_test:
         dsn = "mongodb://{}:{}".format('localhost', 27017)
@@ -37,17 +28,14 @@ def connect_database(database_name: str, local_test: bool = False) -> pymongo.da
 def delete_database(db: pymongo.database.Database) -> None:
     """
     Deletes all documents and collections of the database.
-
     Parameters
     ----------
     db : pymongo.database.Database
         pymongo database object containing the connection to the database that
         wants to deleted.
-
     Returns
     -------
     None
-
     """
     for collection_name in db.list_collection_names():
         db.get_collection(collection_name).drop()
@@ -57,19 +45,16 @@ def get_collection(db: pymongo.database.Database, collection_name: str) -> pymon
     """
     Get and return the pymongo collection object given a database, if doesn't
     exist creates it and if exists deletes all documents on it.
-
     Parameters
     ----------
     db : pymongo.database.Database
         pymongo database object containing the connection to the database.
     collection_name : str
         Name of the collection we want to obtain the object off.
-
     Returns
     -------
     pymongo.collection.Collection
         pymongo collection object containing the connection to the database collection.
-
     """
     try:
         collection = db.create_collection(collection_name)
@@ -82,38 +67,34 @@ def get_collection(db: pymongo.database.Database, collection_name: str) -> pymon
 def add_data(db: pymongo.database.Database, file_name: str) -> None:
     """
     Adds to the database all data stored in the given file.
-
     Parameters
     ----------
     db : pymongo.database.Database
         pymongo database object containing the connection to the database.
     file_name : str
         Name of the file containing all the data to add to the database.
-
     Returns
     -------
     None
-
     """
     add_artists(db, file_name)
+    add_characters(db, file_name)
+    add_remainder(db, file_name)
 
 
 def add_artists(db: pymongo.database.Database, file_name: str) -> None:
     """
     Adds all the artist in the given file to the "Artista" collection of the
     database.
-
     Parameters
     ----------
     db : pymongo.database.Database
         pymongo database object containing the connection to the database.
     file_name : str
         Name of the file containing all the data to add to the database.
-
     Returns
     -------
     None
-
     """
     artista_raw_data = pd.read_excel(file_name, "Artistes")
     artista_formated_data = [{"_id": row["Nom_artistic"], "nom": row["nom"],
@@ -121,6 +102,62 @@ def add_artists(db: pymongo.database.Database, file_name: str) -> None:
                               "data_naixement": row["data_naix"],
                               "pais": row["pais"]} for index, row in artista_raw_data.iterrows()]
     get_collection(db, "Artista").insert_many(artista_formated_data)
+
+def add_characters(db: pymongo.database.Database, file_name: str) -> None:
+    """
+    Adds all the characters in the given file to the "Personatges" collection
+    of the database.
+    Parameters
+    ----------
+    db : pymongo.database.Database
+        pymongo database object containing the connection to the database.
+    file_name : str
+        Name of the file containing all the data to add to the database.
+    Returns
+    -------
+    None
+    """
+    personatge_raw_data = pd.read_excel(file_name, "Personatges")
+    personatge_formated_data = [{"_id": row["nom"], "tipus": row["tipus"],
+                              "isbn": row["isbn"]} for index, row in personatge_raw_data.iterrows()]
+    get_collection(db, "Personatge").insert_many(personatge_formated_data)
+
+def add_remainder(db: pymongo.database.Database, file_name: str) -> None:
+    """
+    Adds all the editorials, collections and publications in the given file to
+    the "Editorial", "Coleccio" and "Publicacio" collections of the database.
+    Parameters
+    ----------
+    db : pymongo.database.Database
+        pymongo database object containing the connection to the database.
+    file_name : str
+        Name of the file containing all the data to add to the database.
+    Returns
+    -------
+    None
+    """
+    editorial_raw_data = pd.read_excel(file_name, "Colleccions-Publicacions")
+    editorial_formated_data = [{"_id": row["NomEditorial"],
+                                "responsable": row["responsable"],
+                                "adreca": row["adreca"],
+                                "pais": row["pais"]} for index, row in editorial_raw_data.iterrows()]
+    get_collection(db, "Editorial").insert_many(editorial_formated_data)
+    
+    coleccio_raw_data = pd.read_excel(file_name, "Colleccions-Publicacions")
+    coleccio_formated_data = [{"_id": row["NomColleccio"],
+                               "total_exemplars": row["total_exemplars"],
+                               "genere": row["genere"], "idioma": row["idioma"],
+                               "any_inici": row["any_inici"], "any_fi": row["any_fi"],
+                               "tancada": row["tancada"]} for index, row in coleccio_raw_data.iterrows()]
+    get_collection(db, "Coleccio").insert_many(coleccio_formated_data)
+    
+    publicacio_raw_data = pd.read_excel(file_name, "Colleccions-Publicacions")
+    publicacio_formated_data = [{"_id": row["ISBN"], "titol": row["titol"],
+                               "stock": row["stock"], "autor": row["autor"],
+                               "preu": row["preu"], "num_pagines": row["num_pagines"],
+                               "guionistes": row["guionistes"],
+                               "dibuixants": row["dibuixants"]} for index, row in publicacio_raw_data.iterrows()]
+    get_collection(db, "Publicacio").insert_many(publicacio_formated_data)
 
 
 if __name__ == "__main__":
