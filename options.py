@@ -24,8 +24,9 @@ class Options(argparse.ArgumentParser):
         super().__init__(description="This script inserts data into a scheme previously created for outlier detection experiments", formatter_class=SortingHelpFormatter)
         # Positional arguments
         super().add_argument('-f','--fileName', type=str, help='EXCEL File where data is stored.')
-        super().add_argument('--delete-all', help='Delete all files from the selected DB.', action="store_true")
         super().add_argument('-db', type=str, help='Select the DB to perform the operations')
+        # Optional arguments
+        super().add_argument('--delete-all', help='Delete all files from the selected DB.', action="store_true")
 
     def parse(self):
         return super().parse_args()
