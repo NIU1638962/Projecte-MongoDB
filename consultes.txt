@@ -1,0 +1,29 @@
+1.-
+db.Publicacion.aggregate([
+    {"$project": {"_id": 0, "titulo":1, "precio_tienda": 1}},
+    {"$sort": {"precio_tienda": -1}},
+    {"$limit": 5}
+])
+
+2.-
+db.Publicacion.aggregate([
+    {"$match": {"editorial": "Juniper Books"}},
+    {"$group": {
+        "_id": "$editorial",
+        "preu_min": {"$min": "$precio_tienda"},
+        "preu_max": {"$max": "$precio_tienda"},
+        "preu_avg": {"$avg": "$precio_tienda"},
+    }}
+])
+
+3.-
+
+
+
+4.-
+5.-
+6.-
+7.-
+8.-
+9.-
+10.-
