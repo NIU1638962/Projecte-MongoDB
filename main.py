@@ -78,8 +78,8 @@ def add_data(db: pymongo.database.Database, file_name: str) -> None:
     None
     """
     add_artists(db, file_name)
-    add_characters(db, file_name)
-    add_remainder(db, file_name)
+    add_editorials(db, file_name)
+    add_publicacios(db, file_name)
 
 
 def add_artists(db: pymongo.database.Database, file_name: str) -> None:
@@ -103,61 +103,111 @@ def add_artists(db: pymongo.database.Database, file_name: str) -> None:
                               "pais": row["pais"]} for index, row in artista_raw_data.iterrows()]
     get_collection(db, "Artista").insert_many(artista_formated_data)
 
-def add_characters(db: pymongo.database.Database, file_name: str) -> None:
+
+def add_editorials(db: pymongo.database.Database, file_name: str) -> None:
     """
-    Adds all the characters in the given file to the "Personatges" collection
-    of the database.
+    Adds all the editorial (and respective collections) in the given file to
+    the "Editorial" collection of the database.
+
     Parameters
     ----------
     db : pymongo.database.Database
         pymongo database object containing the connection to the database.
     file_name : str
         Name of the file containing all the data to add to the database.
+
     Returns
     -------
     None
+
+    """
+    colleccions_publicacions_raw_data = pd.read_excel(
+        file_name, "Colleccions-Publicacions")
+
+    editorials_collecions_raw_data = {index[0]: {"_id": index[0],
+                                                 "responsable": index[1],
+                                                 "adreça": index[2],
+                                                 "pais": index[3],
+                                                 "col·leccions": []} for index, row in colleccions_publicacions_raw_data.groupby([
+                                                     "NomEditorial",
+                                                     "resposable",
+                                                     "adreca",
+                                                     "pais"]).count().iterrows()}
+
+    for index, row in colleccions_publicacions_raw_data.groupby(["NomEditorial", "NomColleccio", "total_exemplars", "genere", "idioma", "any_inici", "any_fi", "tancada"]):
+        editorials_collecions_raw_data[index[0]]["col·leccions"].append(
+            {"_id": index[1], "total_exemplars": index[2],
+             "gèneres": index[3][1:-1].split(", "), "idioma": index[4],
+             "any_inici": int(index[5]), "any_fi": int(index[6]),
+             "tancada": index[7]})
+
+    editorials_collecions_formated_data = list(
+        editorials_collecions_raw_data.values())
+
+    get_collection(db, "Editorial").insert_many(
+        editorials_collecions_formated_data)
+
+
+def get_characters(file_name: str) -> dict:
+    """
+    Gets all the characters in the given file.
+    Parameters
+    ----------
+    file_name : str
+        Name of the file containing all the data to add to the database.
+    Returns
+    -------
+    dict :
+        Dictionaries with key ISBN and item a list of dictionaties where each
+        dictionary is a character and their information.
     """
     personatge_raw_data = pd.read_excel(file_name, "Personatges")
-    personatge_formated_data = [{"_id": row["nom"], "tipus": row["tipus"],
-                              "isbn": row["isbn"]} for index, row in personatge_raw_data.iterrows()]
-    get_collection(db, "Personatge").insert_many(personatge_formated_data)
 
-def add_remainder(db: pymongo.database.Database, file_name: str) -> None:
+    personatge_formated_data = {}
+
+    for index, row in personatge_raw_data.iterrows():
+        if row["isbn"] in personatge_formated_data.keys():
+            personatge_formated_data[row["isbn"]].append(
+                {"_id": row["nom"], "tipus": row["tipus"]})
+        else:
+            personatge_formated_data[row["isbn"]] = [
+                {"_id": row["nom"], "tipus": row["tipus"]}]
+
+    return personatge_formated_data
+
+
+def add_publicacios(db: pymongo.database.Database, file_name: str) -> None:
     """
-    Adds all the editorials, collections and publications in the given file to
-    the "Editorial", "Coleccio" and "Publicacio" collections of the database.
+    Adds all the publications in the given file to the "Publicacio" collection
+    of the database.
+
     Parameters
     ----------
     db : pymongo.database.Database
         pymongo database object containing the connection to the database.
     file_name : str
         Name of the file containing all the data to add to the database.
+
     Returns
     -------
     None
+
     """
-    editorial_raw_data = pd.read_excel(file_name, "Colleccions-Publicacions")
-    editorial_formated_data = [{"_id": row["NomEditorial"],
-                                "responsable": row["responsable"],
-                                "adreca": row["adreca"],
-                                "pais": row["pais"]} for index, row in editorial_raw_data.iterrows()]
-    get_collection(db, "Editorial").insert_many(editorial_formated_data)
-    
-    coleccio_raw_data = pd.read_excel(file_name, "Colleccions-Publicacions")
-    coleccio_formated_data = [{"_id": row["NomColleccio"],
-                               "total_exemplars": row["total_exemplars"],
-                               "genere": row["genere"], "idioma": row["idioma"],
-                               "any_inici": row["any_inici"], "any_fi": row["any_fi"],
-                               "tancada": row["tancada"]} for index, row in coleccio_raw_data.iterrows()]
-    get_collection(db, "Coleccio").insert_many(coleccio_formated_data)
-    
-    publicacio_raw_data = pd.read_excel(file_name, "Colleccions-Publicacions")
-    publicacio_formated_data = [{"_id": row["ISBN"], "titol": row["titol"],
-                               "stock": row["stock"], "autor": row["autor"],
-                               "preu": row["preu"], "num_pagines": row["num_pagines"],
-                               "guionistes": row["guionistes"],
-                               "dibuixants": row["dibuixants"]} for index, row in publicacio_raw_data.iterrows()]
-    get_collection(db, "Publicacio").insert_many(publicacio_formated_data)
+    colleccions_publicacions_raw_data = pd.read_excel(
+        file_name, "Colleccions-Publicacions")
+
+    personatges_formated_data = get_characters(file_name)
+
+    publicacio_formated_data = [{"_id": row["ISBN"], "titol":row["titol"],
+                                 "autor":row["autor"],
+                                 "num_pàgines":row["num_pagines"],
+                                 "estoc":row["stock"], "preu":row["preu"],
+                                 "editorial":row["NomEditorial"],
+                                 "col·lecció":row["NomColleccio"],
+                                 "personatges":personatges_formated_data[row["ISBN"]]} for index, row in colleccions_publicacions_raw_data.iterrows()]
+
+    get_collection(db, "Publicacio").insert_many(
+        publicacio_formated_data)
 
 
 if __name__ == "__main__":
