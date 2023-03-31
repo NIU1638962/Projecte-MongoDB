@@ -9,18 +9,28 @@ db.Publicacion.aggregate([
 db.Publicacion.aggregate([
     {$match: {"editorial": "Juniper Books"}},
     {$group: {
-        _id: "$editorial",
-        "preu_min": {"$min": "$precio_tienda"},
-        "preu_max": {"$max": "$precio_tienda"},
-        "preu_avg": {"$avg": "$precio_tienda"},
+        "_id": "$editorial",
+        "preu_min": {$min: "$precio_tienda"},
+        "preu_max": {$max: "$precio_tienda"},
+        "preu_avg": {$avg: "$precio_tienda"},
     }}
 ])
 
 3.-
 
-
+//TODO: Muy dificil
 
 4.-
+
+db.Editorial.aggregate([
+    {$unwind: "$colecciones"},
+    {$unwind: "$colecciones.generos"},
+    {$group: {
+        "_id": "$colecciones.generos",
+        "cuenta": {$sum: 1}
+    }}    
+])
+
 5.-
 6.-
 7.-
