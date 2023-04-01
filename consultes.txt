@@ -32,8 +32,37 @@ db.Editorial.aggregate([
 ])
 
 5.-
+db.Editorial.aggregate([
+    {$unwind: "$colecciones"},
+    {$unwind: "$colecciones.finalizada"},
+    {$group: {
+        "_id": "$colecciones.finalizada",
+        "cuenta": {$count: {}}
+    }},
+    {$project: {
+        "_id": {
+            $cond: {
+                if: "$_id",
+                then: "Finalizadas",
+                else: "No finalizadas"
+            }
+        },
+        "cuenta": 1
+    }}
+])
+
 6.-
+
+
 7.-
+
+
 8.-
+
+
 9.-
+
+
 10.-
+
+
