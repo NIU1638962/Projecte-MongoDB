@@ -52,7 +52,13 @@ db.Editorial.aggregate([
 ])
 
 6.-
-
+db.Editorial.aggregate([
+    {$unwind: "$colecciones"},
+    {$match: {"colecciones.finalizada": true}},
+    {$sort: {"colecciones.total_ejemplares": -1}},
+    {$limit: 2},
+    {$project: {"id": 1, "coleccion": "$colecciones._id", "num_ejemplares": "$colecciones.total_ejemplares"}}
+])
 
 7.-
 
