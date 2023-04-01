@@ -80,7 +80,9 @@ db.Publicacion.aggregate([
 ])
 
 8.-
-
+db.Publicacion.find({
+    "personajes.tipo": "heroe"
+})
 
 9.-
 
