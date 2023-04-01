@@ -61,7 +61,23 @@ db.Editorial.aggregate([
 ])
 
 7.-
-
+db.Publicacion.aggregate([
+    {$unwind: "$artistas"},
+    {$match: {"artistas.rol": "guionista"}},
+    {$group:{
+        "_id": "$artistas.artista_id",
+        "num_guiones": {$count: {}}
+    }},
+    {$sort: {"num_guiones": -1}},
+    {$limit: 2}, // Este numero se puede cambiar
+    {$lookup: {
+        from: "Artista",
+        localField: "_id",
+        foreignField: "_id",
+        as: "datos_artista"
+    }},
+    {$project: {"_id": 1, "datos_artista.pais": 1}}
+])
 
 8.-
 
@@ -70,5 +86,3 @@ db.Editorial.aggregate([
 
 
 10.-
-
-
