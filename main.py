@@ -79,7 +79,7 @@ def add_data(db: pymongo.database.Database, file_name: str) -> None:
     """
     add_artists(db, file_name)
     add_editorials(db, file_name)
-    add_publicacios(db, file_name)
+    add_publications(db, file_name)
 
 
 def add_artists(db: pymongo.database.Database, file_name: str) -> None:
@@ -136,7 +136,7 @@ def add_editorials(db: pymongo.database.Database, file_name: str) -> None:
 
     for index, row in colleccions_publicacions_raw_data.groupby(["NomEditorial", "NomColleccio", "total_exemplars", "genere", "idioma", "any_inici", "any_fi", "tancada"]):
         editorials_collecions_raw_data[index[0]]["col·leccions"].append(
-            {"_id": index[1], "total_exemplars": index[2],
+            {"_id": index[1], "total_exemplars": int(index[2]),
              "gèneres": index[3][1:-1].split(", "), "idioma": index[4],
              "any_inici": int(index[5]), "any_fi": int(index[6]),
              "tancada": index[7]})
@@ -176,7 +176,7 @@ def get_characters(file_name: str) -> dict:
     return personatge_formated_data
 
 
-def add_publicacios(db: pymongo.database.Database, file_name: str) -> None:
+def add_publications(db: pymongo.database.Database, file_name: str) -> None:
     """
     Adds all the publications in the given file to the "Publicacio" collection
     of the database.
@@ -198,16 +198,62 @@ def add_publicacios(db: pymongo.database.Database, file_name: str) -> None:
 
     personatges_formated_data = get_characters(file_name)
 
+    # FIXME
     publicacio_formated_data = [{"_id": row["ISBN"], "titol":row["titol"],
                                  "autor":row["autor"],
                                  "num_pàgines":row["num_pagines"],
                                  "estoc":row["stock"], "preu":row["preu"],
                                  "editorial":row["NomEditorial"],
                                  "col·lecció":row["NomColleccio"],
-                                 "personatges":personatges_formated_data[row["ISBN"]]} for index, row in colleccions_publicacions_raw_data.iterrows()]
+                                 "personatges":personatges_formated_data[row["ISBN"]],
+                                 "artistes":get_artistes(row["guionistes"], row["dibuixants"])} if row["ISBN"] in personatges_formated_data.keys() else {"_id": row["ISBN"], "titol":row["titol"],
+                                "autor":row["autor"],
+                                "num_pàgines":row["num_pagines"],
+                                "estoc":row["stock"], "preu":row["preu"],
+                                "editorial":row["NomEditorial"],
+                                "col·lecció":row["NomColleccio"],
+                                "personatges": [], "artistes":get_artistes(row["guionistes"], row["dibuixants"])} for index, row in colleccions_publicacions_raw_data.iterrows()]
+    # XXX
 
     get_collection(db, "Publicacio").insert_many(
         publicacio_formated_data)
+
+
+def get_artistes(guionistes: str, dibuixants: str) -> dict:
+    """
+
+
+    Parameters
+    ----------
+    guionistes : str
+        DESCRIPTION.
+    dibuixants : str
+        DESCRIPTION.
+
+    Returns
+    -------
+    dict
+        DESCRIPTION.
+
+    """
+    guionistes = guionistes[1:-1].split(", ")
+    dibuixants = dibuixants[1:-1].split(", ")
+
+    artistes = {}
+
+    for guionista in guionistes:
+        if guionista in artistes.keys():
+            artistes[guionista].append("guionista")
+        else:
+            artistes[guionista] = ["guionista"]
+
+    for dibuixant in dibuixants:
+        if dibuixant in artistes.keys():
+            artistes[dibuixant].append("dibuixant")
+        else:
+            artistes[dibuixant] = ["dibuixant"]
+
+    return artistes
 
 
 if __name__ == "__main__":
