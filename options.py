@@ -7,8 +7,6 @@
         __email__ = 'oriolrt@cvc.uab.cat'
 
 """
-
-
 from argparse import ArgumentParser, HelpFormatter
 from operator import attrgetter
 
