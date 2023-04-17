@@ -29,14 +29,13 @@ db.Publicacion.aggregate([
 ])
 
 4.-
-
 db.Editorial.aggregate([
-    {$unwind: "$colecciones"},
-    {$unwind: "$colecciones.generos"},
+    {$unwind: "$col·leccions"},
+    {$unwind: "$col·leccions.gèneres"},
     {$group: {
-        "_id": "$colecciones.generos",
-        "cuenta": {$sum: 1}
-    }}    
+        "_id": "$col·leccions.gèneres",
+        "compte": {$sum: 1}
+    }}   
 ])
 
 5.-
