@@ -1,8 +1,8 @@
 1.-
-db.Publicacion.aggregate([
-    {$project: {"_id": 0, "titulo":1, "precio_tienda": 1}},
-    {$sort: {"precio_tienda": -1}},
-    {$limit: 5}
+db.Publicacio.aggregate([
+    {$sort: {"preu": -1}},
+    {$limit: 5},
+    {$project: {"_id": 0, "titol":1, "preu": 1}}
 ])
 
 2.-
