@@ -40,21 +40,12 @@ db.Editorial.aggregate([
 
 5.-
 db.Editorial.aggregate([
-    {$unwind: "$colecciones"},
-    {$unwind: "$colecciones.finalizada"},
+    {$unwind: "$col·leccions"},
+    {$unwind: "$col·leccions.tancada"},
     {$group: {
-        "_id": "$colecciones.finalizada",
-        "cuenta": {$count: {}}
-    }},
-    {$project: {
-        "_id": {
-            $cond: {
-                if: "$_id",
-                then: "Finalizadas",
-                else: "No finalizadas"
-            }
-        },
-        "cuenta": 1
+        "_id": "$_id",
+        final: {$sum: {$cond: [{$eq: ["$col·leccions.tancada", true]}, 1, 0]}},
+        nofinal: {$sum: {$cond: [{$eq: ["$col·leccions.tancada", false]}, 1, 0]}} 
     }}
 ])
 
