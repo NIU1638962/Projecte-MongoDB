@@ -6,13 +6,13 @@ db.Publicacio.aggregate([
 ])
 
 2.-
-db.Publicacion.aggregate([
+db.Publicacio.aggregate([
     {$match: {"editorial": "Juniper Books"}},
     {$group: {
         "_id": "$editorial",
-        "preu_min": {$min: "$precio_tienda"},
-        "preu_max": {$max: "$precio_tienda"},
-        "preu_avg": {$avg: "$precio_tienda"},
+        "preu_min": {$min: "$preu"},
+        "preu_max": {$max: "$preu"},
+        "preu_avg": {$avg: "$preu"},
     }}
 ])
 
