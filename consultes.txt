@@ -85,6 +85,9 @@ db.Publicacion.find({
 })
 
 9.-
-
+db.Publicacion.updateMany(
+    {}, 
+    {$mul: {"precio_tienda": 1.25}}
+)
 
 10.-
