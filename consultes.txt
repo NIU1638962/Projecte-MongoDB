@@ -5,7 +5,7 @@ db.Publicacio.aggregate([
     {$project: {"_id": 0, "titol":1, "preu": 1}}
 ])
 
-2.-
+2.- TODO
 db.Publicacio.aggregate([
     {$match: {"editorial": "Juniper Books"}},
     {$group: {
@@ -58,7 +58,7 @@ db.Editorial.aggregate([
     {$project: {"_id": 1, "colecció": "$col·leccions._id"}}
 ])
 
-7.-
+7.- TODO
 db.Publicacion.aggregate([
     {$unwind: "$artistas"},
     {$match: {"artistas.rol": "guionista"}},
