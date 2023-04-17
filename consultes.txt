@@ -17,8 +17,16 @@ db.Publicacion.aggregate([
 ])
 
 3.-
-
-//TODO: Muy dificil
+db.Publicacion.aggregate([
+    {$unwind: "$artistas"},
+    {$match: {"artistas.rol": "dibujante"}},
+    {$group: {
+        "_id": "$artistas.artista_id",
+        "num_pubs": {$count: {}}
+    }},
+    {$match: {"num_pubs": {$gt: 5}}},
+    {$project: {"_id": 1}}
+])
 
 4.-
 
