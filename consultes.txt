@@ -78,15 +78,17 @@ db.Publicacion.aggregate([
 ])
 
 8.-
-db.Publicacion.find({
-    "personajes.tipo": "heroe"
-})
+db.Publicacio.aggregate([
+    {$unwind: "$personatges"},
+    {$match: {"personatges.tipus": "heroe"}},
+    {$project: {"_id": 1}}
+])
 
 9.-
-db.Publicacion.updateMany(
+db.Publicacio.updateMany(
     {}, 
-    {$mul: {"precio_tienda": 1.25}}
+    {$mul: {"preu": 1.25}}
 )
 
 10.-
-db.Publicacion.find({}).project({_id: 1, titulo: 1, personajes: 1})
+db.Publicacio.find({}).project({_id: 1, titol: 1, personatges: 1})
