@@ -91,3 +91,4 @@ db.Publicacion.updateMany(
 )
 
 10.-
+db.Publicacion.find({}).project({_id: 1, titulo: 1, personajes: 1})
