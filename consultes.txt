@@ -17,12 +17,11 @@ db.Publicacio.aggregate([
 ])
 
 3.-
-db.Publicacion.aggregate([
-    {$unwind: "$artistas"},
-    {$match: {"artistas.rol": "dibujante"}},
+db.Publicacio.aggregate([
+    {$unwind: "$artistes.dibuixants"},
     {$group: {
-        "_id": "$artistas.artista_id",
-        "num_pubs": {$count: {}}
+        "_id": "$artistes.dibuixants",
+        "num_pubs": {$sum: 1}
     }},
     {$match: {"num_pubs": {$gt: 5}}},
     {$project: {"_id": 1}}
