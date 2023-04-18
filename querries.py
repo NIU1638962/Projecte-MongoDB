@@ -73,12 +73,13 @@ pprint.pprint(result_4)
 # 5.
 result_5 = list(colleccio_Editorials.aggregate([
     {"$unwind": "$col·leccions"},
-    {"$group": {"_id": {"editorial": "$_id",
-                        "tancada": "$col·leccions.tancada"}, "count": {"$sum": 1}}},
-    {"$project": {"_id": 0, "editorial": "$_id.editorial",
-                  "tancada": "$_id.tancada", "count": 1}}
-]))
-
+    {"$unwind": "$col·leccions.tancada"},
+    {"$group": {
+        "_id": "$_id",
+        "final": {"$sum": {"$cond": [{"$eq": ["$col·leccions.tancada", True]}, 1, 0]}},
+        "nofinal": {"$sum": {"$cond": [{"$eq": ["$col·leccions.tancada", False]}, 1, 0]}}}}
+])
+)
 print("-".join(["-" for i in range(45)]) + str("\n5: "))
 pprint.pprint(result_5)
 
