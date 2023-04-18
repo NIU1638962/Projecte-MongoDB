@@ -47,7 +47,8 @@ def add_artists(database: pymongo.database.Database, file_name: str) -> None:
                               "cognoms": row["cognoms"],
                               "data_naixement": row["data_naix"],
                               "pais": row["pais"]} for index, row in artista_raw_data.iterrows()]
-    get_collection(database, "Artista").insert_many(artista_formated_data)
+    get_collection(database, "Artista", True).insert_many(
+        artista_formated_data)
 
 
 def add_editorials(database: pymongo.database.Database, file_name: str) -> None:
@@ -70,27 +71,33 @@ def add_editorials(database: pymongo.database.Database, file_name: str) -> None:
     colleccions_publicacions_raw_data = pd.read_excel(
         file_name, "Colleccions-Publicacions")
 
-    editorials_collecions_raw_data = {index[0]: {"_id": index[0],
-                                                 "responsable": index[1],
-                                                 "adreça": index[2],
-                                                 "pais": index[3],
-                                                 "col·leccions": []} for index, row in colleccions_publicacions_raw_data.groupby([
-                                                     "NomEditorial",
-                                                     "resposable",
-                                                     "adreca",
-                                                     "pais"]).count().iterrows()}
+    editorials_collections_raw_data = {index[0]: {"_id": index[0],
+                                                  "responsable": index[1],
+                                                  "adreça": index[2],
+                                                  "pais": index[3],
+                                                  "col·leccions": {}} for index, row in colleccions_publicacions_raw_data.groupby([
+                                                      "NomEditorial",
+                                                      "resposable",
+                                                      "adreca",
+                                                      "pais"]).count().iterrows()}
 
-    for index, row in colleccions_publicacions_raw_data.groupby(["NomEditorial", "NomColleccio", "total_exemplars", "genere", "idioma", "any_inici", "any_fi", "tancada"]):
-        editorials_collecions_raw_data[index[0]]["col·leccions"].append(
-            {"_id": index[1], "total_exemplars": int(index[2]),
-             "gèneres": index[3][1:-1].split(", "), "idioma": index[4],
-             "any_inici": int(index[5]), "any_fi": int(index[6]),
-             "tancada": index[7]})
+    for index, row in colleccions_publicacions_raw_data.iterrows():
+        editorials_collections_raw_data[row[0]]["col·leccions"][row[4]] = {"_id": row[4],
+                                                                           "total_exemplars": int(row[5]),
+                                                                           "gèneres": row[6][1:-1].split(", "),
+                                                                           "idioma": row[7],
+                                                                           "any_inici": int(row[8]),
+                                                                           "any_fi": float(row[9]),
+                                                                           "tancada": row[10]}
+
+    for i in editorials_collections_raw_data:
+        editorials_collections_raw_data[i]["col·leccions"] = list(
+            editorials_collections_raw_data[i]["col·leccions"].values())
 
     editorials_collecions_formated_data = list(
-        editorials_collecions_raw_data.values())
+        editorials_collections_raw_data.values())
 
-    get_collection(database, "Editorial").insert_many(
+    get_collection(database, "Editorial", True).insert_many(
         editorials_collecions_formated_data)
 
 
@@ -118,18 +125,23 @@ def add_publications(database: pymongo.database.Database, file_name: str) -> Non
 
     publicacio_formated_data = [{"_id": row["ISBN"], "titol":row["titol"],
                                  "autor":row["autor"],
-                                 "num_pàgines":row["num_pagines"],
-                                 "estoc":row["stock"], "preu":row["preu"],
+                                 "num_pàgines":int(row["num_pagines"]),
+                                 "estoc":int(row["stock"]),
+                                 "preu":float(row["preu"]),
                                  "editorial":row["NomEditorial"],
                                  "col·lecció":row["NomColleccio"],
                                  "personatges":personatges_formated_data[row["ISBN"]],
-                                 "artistes":get_artistes(row["guionistes"], row["dibuixants"])} if row["ISBN"] in personatges_formated_data else {"_id": row["ISBN"], "titol":row["titol"],
+                                 "artistes":get_artistes(row["guionistes"],
+                                                         row["dibuixants"])} if row["ISBN"] in personatges_formated_data else {"_id": row["ISBN"], "titol":row["titol"],
                                 "autor":row["autor"],
-                                "num_pàgines":row["num_pagines"],
-                                "estoc":row["stock"], "preu":row["preu"],
+                                "num_pàgines":int(row["num_pagines"]),
+                                "estoc":int(row["stock"]),
+                                "preu":float(row["preu"]),
                                 "editorial":row["NomEditorial"],
                                 "col·lecció":row["NomColleccio"],
-                                "personatges": [], "artistes":get_artistes(row["guionistes"], row["dibuixants"])} for index, row in colleccions_publicacions_raw_data.iterrows()]
+                                "personatges": [],
+                                "artistes":get_artistes(row["guionistes"],
+                                                             row["dibuixants"])} for index, row in colleccions_publicacions_raw_data.iterrows()]
 
-    get_collection(database, "Publicacio").insert_many(
+    get_collection(database, "Publicacio", True).insert_many(
         publicacio_formated_data)

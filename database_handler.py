@@ -48,7 +48,8 @@ def delete_database(db_conn: database.Database) -> None:
         db_conn.get_collection(collection_name).drop()
 
 
-def get_collection(db_conn: database.Database, collection_name: str) -> collection.Collection:
+def get_collection(db_conn: database.Database, collection_name: str,
+                   drop: bool = False) -> collection.Collection:
     """
     Get and return the pymongo collection object given a database, if doesn't
     exist creates it and if exists deletes all documents on it.
@@ -58,14 +59,17 @@ def get_collection(db_conn: database.Database, collection_name: str) -> collecti
         pymongo database object containing the connection to the database.
     collection_name : str
         Name of the collection we want to obtain the object off.
+    drop : bool
+        If the collection already exist, true drops it, false doesn't.
     Returns
     -------
     pymongo.collection.Collection
         pymongo collection object containing the connection to the database collection.
     """
     try:
-        collection = db_conn.create_collection(collection_name)
+        collection_reference = db_conn.create_collection(collection_name)
     except errors.CollectionInvalid:
-        collection = db_conn.get_collection(collection_name)
-        collection.drop()
-    return collection
+        collection_reference = db_conn.get_collection(collection_name)
+        if drop:
+            collection_reference.drop()
+    return collection_reference

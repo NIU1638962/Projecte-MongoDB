@@ -42,31 +42,20 @@ def get_artistes(guionistes: str, dibuixants: str) -> dict:
     Parameters
     ----------
     guionistes : str
-        DESCRIPTION.
+        sring of shape "[artist1, artista2, ...]" with the artsits id's of
+        those that were writers.
     dibuixants : str
-        DESCRIPTION.
+        sring of shape "[artist1, artista2, ...]" with the artsits id's of
+        those that were drawers.
 
     Returns
     -------
     dict
-        DESCRIPTION.
+        dictionary of lists, with roles as keys and then a list of the artists
+        id's of that role.
 
     """
-    guionistes = guionistes[1:-1].split(", ")
-    dibuixants = dibuixants[1:-1].split(", ")
 
-    artistes = {}
-
-    for guionista in guionistes:
-        if guionista in artistes:
-            artistes[guionista].append("guionista")
-        else:
-            artistes[guionista] = ["guionista"]
-
-    for dibuixant in dibuixants:
-        if dibuixant in artistes:
-            artistes[dibuixant].append("dibuixant")
-        else:
-            artistes[dibuixant] = ["dibuixant"]
-
-    return artistes
+    return {
+        "guionistes": guionistes[1:-1].split(", "),
+        "dibuixants": dibuixants[1:-1].split(", ")}

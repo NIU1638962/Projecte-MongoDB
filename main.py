@@ -10,7 +10,7 @@ from database_handler import connect_database, delete_database
 
 if __name__ == "__main__":
     arguments = Options().parse()
-    db = connect_database(arguments.db, local_test=True)
+    db = connect_database(arguments.db)
     if arguments.delete_all:
         delete_database(db)
     elif arguments.fileName:
