@@ -57,23 +57,22 @@ db.Editorial.aggregate([
     {$project: {"_id": 1, "colecció": "$col·leccions._id"}}
 ])
 
-7.- TODO
-db.Publicacion.aggregate([
-    {$unwind: "$artistas"},
-    {$match: {"artistas.rol": "guionista"}},
+7.-
+db.Publicacio.aggregate([
+    {$unwind: "$artistes.guionistes"},
     {$group:{
-        "_id": "$artistas.artista_id",
-        "num_guiones": {$count: {}}
+        "_id": "$artistes.guionistes",
+        "num_guions": {$count: {}},
     }},
-    {$sort: {"num_guiones": -1}},
-    {$limit: 2}, // Este numero se puede cambiar
+    {$sort: {"num_guions": -1}},
+    {$limit: 1},
     {$lookup: {
         from: "Artista",
         localField: "_id",
         foreignField: "_id",
-        as: "datos_artista"
+        as: "dades_artista"
     }},
-    {$project: {"_id": 1, "datos_artista.pais": 1}}
+    {$project: {"_id": "$dades_artista.pais"}}
 ])
 
 8.-
